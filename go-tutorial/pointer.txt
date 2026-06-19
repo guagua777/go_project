@@ -1,0 +1,147 @@
+Go 语言指针完整详解
+一、基础概念
+1. 什么是指针
+变量：内存中一块存储数据的空间，有值和内存地址
+指针：一个专门存储另一个变量内存地址的变量
+通俗：指针就是 “地址标签”，通过标签能找到原始数据
+2. 两个核心操作符
+& 取地址符：获取变量的内存地址
+* 解引用符：根据地址，取出对应内存里的值
+二、基础语法示例
+go
+运行
+package main
+
+import "fmt"
+
+func main() {
+    // 普通变量
+    var a int = 10
+    fmt.Printf("a 的值：%d\n", a)
+    fmt.Printf("a 的内存地址：%p\n", &a) // &a 取地址
+
+    // 定义指针变量 *int 代表指向int类型的指针
+    var p *int
+    p = &a // 把a的地址赋值给指针p
+    fmt.Printf("指针p存储的地址：%p\n", p)
+    fmt.Printf("*p 解引用，拿到a的值：%d\n", *p)
+
+    // 通过指针修改原变量的值
+    *p = 20
+    fmt.Printf("修改后 a = %d\n", a) // a 变成20
+}
+输出：
+plaintext
+a 的值：10
+a 的内存地址：0x14000016088
+指针p存储的地址：0x14000016088
+*p 解引用，拿到a的值：10
+修改后 a = 20
+关键结论
+修改 *p = 修改原始变量 a
+只修改 p（p = 别的地址）只会让指针指向别处，不影响 a
+三、零值指针：nil
+指针未赋值时默认是 nil（空地址），不能解引用 *nil，会直接 panic 崩溃
+go
+运行
+var p *int
+fmt.Println(p == nil) // true
+// fmt.Println(*p)  // 报错：runtime error: dereference of nil pointer
+使用前必须判空：
+go
+运行
+if p != nil {
+    fmt.Println(*p)
+}
+四、值传递 vs 指针传递（Go 最核心用途）
+Go 所有函数传参默认都是值拷贝：
+传值：函数内部是变量副本，修改副本不影响外部原变量
+传指针：拷贝地址，函数内通过 *指针 修改原始内存数据
+示例 1：传值（修改无效）
+go
+运行
+func change(x int) {
+    x = 100
+}
+func main() {
+    num := 10
+    change(num)
+    fmt.Println(num) // 输出10，没变化
+}
+示例 2：传指针（修改生效）
+go
+运行
+func change(x *int) {
+    *x = 100 // 解引用修改原始变量
+}
+func main() {
+    num := 10
+    change(&num) // 传入变量地址
+    fmt.Println(num) // 输出100
+}
+使用场景
+小数据（int、bool、float）：直接传值，没必要指针
+大数据（结构体、数组）：传指针避免完整拷贝，节省内存
+需要在函数内修改外部变量：必须传指针
+五、结构体指针（高频使用）
+简写语法：结构体指针可省略 *
+go
+运行
+package main
+import "fmt"
+
+type Person struct {
+    name string
+    age  int
+}
+
+func main() {
+    p := Person{"张三", 18}
+    ptr := &p // 结构体指针
+
+    // 标准写法 (*ptr).age = 20
+    ptr.age = 20 // Go语法糖，自动解引用，不用写*
+    fmt.Println(p.age) // 20
+}
+结构体构造直接返回指针（工程常用）
+go
+运行
+func NewPerson(name string, age int) *Person {
+    // 返回局部变量地址，Go的逃逸分析会把变量分配到堆，不会销毁
+    return &Person{name: name, age: age}
+}
+六、数组指针 vs 切片（易混淆点）
+数组指针 *[5]int：指向完整数组，拷贝成本高，极少用
+切片 []int：切片本身底层自带指针，传切片不用再加&
+go
+运行
+func modifySlice(s []int) {
+    s[0] = 99 // 直接修改底层数组
+}
+func main() {
+    arr := []int{1,2,3}
+    modifySlice(arr)
+    fmt.Println(arr) // [99 2 3]
+}
+只有需要修改切片长度、容量时，才传 *[]int
+七、指针的限制（Go 和 C/C++ 最大区别）
+不支持指针运算：不能 p++、p+1 偏移地址，杜绝野指针
+不能把 int 随便转指针，类型严格匹配：*int 只能存 int 变量地址
+有 GC 垃圾回收，不用手动 free 释放内存
+八、取地址速记简写
+go
+运行
+a := 5
+p := &a // 完整写法
+p := &5 // 常量也可取地址
+九、常见踩坑
+解引用 nil 指针 → panic，使用前判 nil
+函数传值误以为能改外部变量 → 改用指针传参
+结构体指针忘记可以简写 .，强行写(*ptr)冗余
+对切片重复取 &[]int，多余且容易出错
+十、总结
+&变量：获取内存地址；*指针：访问地址对应的值
+指针本质：存储内存地址的特殊变量，零值 nil
+核心作用：函数内修改外部变量、减少大对象拷贝
+Go 无指针加减运算，安全无野指针，配合 GC 自动管理内存
+结构体指针支持语法糖 ptr.字段，无需手动解引用
