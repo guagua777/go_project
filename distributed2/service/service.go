@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/guagua777/distributed/registry"
 )
 
 /**
@@ -15,15 +17,32 @@ import (
 
 // 向http中注册handler
 // 公共函数，用于启动服务
-func Start(ctx context.Context, serviceName, host string, port string,
+/**
+由三个部分组成：
+1. 对应服务的handler
+2. 启动相应的服务（根据host和端口）
+3. 注册服务（将服务注册信息发送给注册服务）
+
+对应的日志即为：
+1. 日志服务的handler
+2. 启动日志服务（根据host和端口）
+3. 注册日志服务（将日志服务的注册信息发送给注册服务）
+
+**/
+func Start(ctx context.Context, reg registry.Registration, host string, port string,
 	registerHandlerFunc func()) (context.Context, error) {
 	registerHandlerFunc()
-	ctx = startService(ctx, serviceName, host, port)
+	ctx = startService(ctx, reg.ServiceName, host, port)
+	// 启动服务后，注册服务
+	err := registry.RegisterService(reg)
+	if err != nil {
+		return ctx, err
+	}
 
 	return ctx, nil
 }
 
-func startService(ctx context.Context, serviceName, host, port string) context.Context {
+func startService(ctx context.Context, serviceName registry.ServiceName, host, port string) context.Context {
 	ctx, cancel := context.WithCancel(ctx)
 
 	var srv http.Server // 定义一个http服务器

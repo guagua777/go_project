@@ -50,7 +50,22 @@
     1. => 存值
     2. => 存channel，使用api的形式来完成，用于控制goroutine的执行流程
 4. channel
-    1. => 输入具体的值
-    2. => 输入空结构体 struct{}
-    3. => 输出具体的值
-    4. => 输出空结构体 struct{}，用作信号
+    1. => 无缓冲通道，有缓冲通道
+    2. => 输入具体的值
+    3. => 输入空结构体 struct{}
+    4. => 输出具体的值
+    5. => 输出空结构体 struct{}，用作信号
+    6. 
+
+5. sync 
+    1. => Mutex
+    2. => RWMutex
+    3. => WaitGroup
+    4. => errgroup
+    5. => once
+    6. => condition
+    7. => semaphore
+    8. => semaphoregroup
+    9. => sync.Map
+    10. => sync.Once
+    11. => sync.WaitGroup

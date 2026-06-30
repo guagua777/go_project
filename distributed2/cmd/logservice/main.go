@@ -6,6 +6,7 @@ import (
 	stlog "log"
 
 	"github.com/guagua777/distributed/log"
+	"github.com/guagua777/distributed/registry"
 	"github.com/guagua777/distributed/service"
 )
 
@@ -13,11 +14,16 @@ func main() {
 	log.Run("./distributed.log") // log写入的地址
 	host, port := "localhost", "4000"
 
-	fmt.Sprintf("http://%s:%s", host, port) // local:4000
+	ServiceURL := fmt.Sprintf("http://%s:%s", host, port) // local:4000
+
+	reg := registry.Registration{
+		ServiceName: "Log Service",
+		ServiceURL:  ServiceURL,
+	}
 
 	ctx, err := service.Start(
 		context.Background(),
-		"Log Service",
+		reg,
 		host,
 		port,
 		log.RegisterHandler,
