@@ -7,6 +7,7 @@ type myHandler struct {
 }
 
 // ServeHTTP 不是ServerHTTP
+// 这个地方为什么要用指针？
 func (m *myHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("home handler"))
 }
@@ -21,7 +22,8 @@ func main() {
 
 	mh := myHandler{} // 要使用的是这个指针
 	server := http.Server{
-		Addr:    "localhost:8080",
+		Addr: "localhost:8080",
+		// 取地址
 		Handler: &mh,
 	}
 	server.ListenAndServe()

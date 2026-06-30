@@ -1,0 +1,2 @@
+一个方法就是一个continuation
+go运行时，也就是调度器，调度这些continuation
