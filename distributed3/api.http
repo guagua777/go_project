@@ -1,0 +1,17 @@
+GET http://127.0.0.1:4000/hello
+
+###
+POST http://127.0.0.1:4000/log
+Content-Type: application/text
+
+需要记录的内容
+
+
+###
+POST http://127.0.0.1:3000/services
+Content-Type: application/text
+
+{
+    "ServiceName": "test",
+    "ServiceURL": "http://127.0.0.1:3000"
+}
