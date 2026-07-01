@@ -33,6 +33,7 @@ func (fl fileLog) Write(data []byte) (int, error) {
 
 // 运行自定义的log的时候，想将log指向某一个具体的文件地址
 // 服务端log的前缀设置
+// 给log赋值
 func Run(destination string) {
 	// 因为fileLog实现了io.Writer接口，所以可以将fileLog作为参数传递给stdlog.New函数
 	log = stdlog.New(fileLog(destination), "go: ", stdlog.LstdFlags) // LstdFlags表示使用标准的日期和时间格式（2006/01/02 15:04:05）来记录日志
