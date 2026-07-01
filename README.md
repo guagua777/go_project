@@ -47,6 +47,7 @@
     1. => 本质上为一个continuation，
     2. => continuation + 调度器
     3. continuation是个表达式，是个计算，把它作为函数体，变为一个无参函数，函数是可以作为值的，把这个函数，加入到队列中
+    4. 创建一个无参函数
 3. Context：闭包，解释器的env
     1. => 存值
     2. => 存channel，使用api的形式来完成，用于控制goroutine的执行流程
