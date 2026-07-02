@@ -36,7 +36,7 @@ func (fl fileLog) Write(data []byte) (int, error) {
 // 给log赋值
 func Run(destination string) {
 	// 因为fileLog实现了io.Writer接口，所以可以将fileLog作为参数传递给stdlog.New函数
-	log = stdlog.New(fileLog(destination), "go: ", stdlog.LstdFlags) // LstdFlags表示使用标准的日期和时间格式（2006/01/02 15:04:05）来记录日志
+	log = stdlog.New(fileLog(destination), "[go] - ", stdlog.LstdFlags) // LstdFlags表示使用标准的日期和时间格式（2006/01/02 15:04:05）来记录日志
 }
 
 // 为什么这个可以作为一个服务？

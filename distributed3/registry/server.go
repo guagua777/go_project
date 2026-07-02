@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -14,8 +15,8 @@ const ServicesURL = "http://localhost" + ServicePort + "/services"
 
 type registry struct {
 	registrations []Registration
-	mutex         *sync.Mutex
-	// mutex *sync.RWMutex
+	// mutex         *sync.Mutex
+	mutex *sync.RWMutex
 }
 
 func (r *registry) add(reg Registration) error {
@@ -23,6 +24,47 @@ func (r *registry) add(reg Registration) error {
 	r.registrations = append(r.registrations, reg)
 	r.mutex.Unlock()
 
+	// 针对刚要注册的服务，发送请求将它所需要的服务请求过来
+	// 看弹幕说是订阅/推送机制，即在注册的时候订阅你感兴趣的服务
+	err := r.sendRequiredServices(reg) // 在注册的时候正好添加依赖的其他服务
+
+	return err
+}
+
+// 针对刚要注册的服务，发送请求将它所需要的服务请求过来
+// 不用registry指针是因为不需要修改r的内容
+func (r registry) sendRequiredServices(reg Registration) error {
+	r.mutex.RLock() // 只需要一个读锁？
+	defer r.mutex.RUnlock()
+
+	var p patch
+	for _, serviceReg := range r.registrations { // 循环已经注册的服务
+		for _, reqService := range reg.RequiredServices { // 循环当前正在注册的服务所依赖的服务
+			if serviceReg.ServiceName == reqService { // 找到
+				p.Added = append(p.Added, patchEntry{ // Added是要增加的服务的slice
+					Name: serviceReg.ServiceName,
+					URL:  serviceReg.ServiceURL,
+				})
+			}
+		}
+	}
+	err := r.sendPatch(p, reg.ServiceUpdateURL)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r registry) sendPatch(p patch, url string) error {
+	d, err := json.Marshal(p) // 将patch变成json
+	if err != nil {
+		return err
+	}
+
+	_, err = http.Post(url, "application/json", bytes.NewBuffer(d)) // 发送POST请求
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -42,7 +84,7 @@ func (r *registry) remove(url string) error {
 
 var reg = registry{
 	registrations: make([]Registration, 0),
-	mutex:         new(sync.Mutex),
+	mutex:         new(sync.RWMutex),
 }
 
 type RegistryService struct{}

@@ -9,7 +9,7 @@ func modify(s []int) []int {
 	return s
 }
 
-func main() {
+func main1() {
 	s := []int{1, 2, 3}
 	// 打印切片内容
 	fmt.Printf("%+v\n", s) // 结构体时有用，切片和 %v 一样
@@ -17,5 +17,20 @@ func main() {
 	r := modify(s[:1])
 	fmt.Printf("%+v\n", r) // 结构体时有用，切片和 %v 一样
 	fmt.Printf("%+v\n", s)
+
+}
+
+type MyString string
+
+func main() {
+	// 初始化切片
+	myStrings := []MyString{"a", "b", "c"}
+	println(myStrings)
+
+	s1 := MyString("a")
+	println(s1)
+
+	// s := MyString{"a"}
+	// println(s)
 
 }

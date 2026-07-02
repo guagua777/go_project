@@ -6,6 +6,7 @@ import (
 	stlog "log"
 
 	"github.com/guagua777/distributed/grades"
+	"github.com/guagua777/distributed/log"
 	"github.com/guagua777/distributed/registry"
 	"github.com/guagua777/distributed/service"
 )
@@ -17,7 +18,12 @@ func main() {
 
 	r := registry.Registration{
 		ServiceName: registry.GradingService,
-		ServiceURL:  serviceAddress,
+		// 对外提供的服务URL
+		ServiceURL: serviceAddress,
+		// 初始化一个切片
+		RequiredServices: []registry.ServiceName{registry.LogService},
+		// 自身url，与注册中心进行沟通
+		ServiceUpdateURL: serviceAddress + "/services",
 	}
 
 	// 启动服务
@@ -29,9 +35,20 @@ func main() {
 		grades.RegisterHandlers,
 	)
 
+	// 获取logservice的URL，用于设置客户端的Logger
+	if logProvider, err := registry.GetProvider(registry.LogService); err == nil { // 通过GetProvider找到registry.LogService对应的URL
+		fmt.Printf("Loggin service found at %s\n", logProvider)
+		log.SetClientLogger(logProvider, r.ServiceName) // 设置客户端的Logger，其实logProvider就是registry.LogService的URL
+	}
+
 	if err != nil {
+		// 写日志，该日志会被写到服务其中
 		stlog.Fatalln(err)
 	}
+
+	// fmt.Printf("local log ......")
+	// 写日志，该日志会被写到日志服务中，而不是本地
+	stlog.Println("Grading service started.")
 
 	// 在ctx未被关闭之前，ctx.Done()返回的chan struct{}是空的（没有值），所以<-ctx.Done()会阻塞
 	// 关闭一个 channel 后，仍然可以从 channel 中读取已经发送的所有元素，直到 channel 中的元素被消耗完为止。

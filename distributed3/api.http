@@ -1,6 +1,12 @@
-GET http://127.0.0.1:4000/hello
+GET http://127.0.0.1:4000/providers
 
 ###
+
+GET http://127.0.0.1:6000/providers
+
+###
+
+
 POST http://127.0.0.1:4000/log
 Content-Type: application/text
 

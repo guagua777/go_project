@@ -7,3 +7,7 @@ go: 2026/06/30 16:50:15 {
   "password": "123456"
 }
 go: 2026/06/30 16:50:50 需要记录的内容
+[go] - 2026/07/02 18:43:57 [GradingService] - Grading service started.
+[go] - 2026/07/02 18:47:26 [GradingService] - Grading service started.
+[go] - 2026/07/02 18:48:06 [GradingService] - http: Server closed
+[go] - 2026/07/02 18:48:40 [GradingService] - Grading service started.
